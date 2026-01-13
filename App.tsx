@@ -9,8 +9,6 @@ const App: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   
   const [config, setConfig] = useState<HumanizationConfig>({
     mode: AppMode.STEALTH,
@@ -24,12 +22,6 @@ const App: React.FC = () => {
   useEffect(() => {
     const saved = localStorage.getItem('squammy_history');
     if (saved) setHistory(JSON.parse(saved));
-
-    const handleFsChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFsChange);
-    return () => document.removeEventListener('fullscreenchange', handleFsChange);
   }, []);
 
   useEffect(() => {
@@ -37,23 +29,6 @@ const App: React.FC = () => {
       outputRef.current.scrollTop = outputRef.current.scrollHeight;
     }
   }, [outputText]);
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch((e) => {
-        console.error(`Error attempting to enable full-screen mode: ${e.message}`);
-      });
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
-  };
-
-  const initializeSystem = () => {
-    setIsInitialized(true);
-    toggleFullscreen();
-  };
 
   const saveToHistory = (original: string, humanized: string) => {
     const newItem: HistoryItem = {
@@ -86,29 +61,6 @@ const App: React.FC = () => {
     }
   };
 
-  if (!isInitialized) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black p-4">
-        <div className="terminal-border p-8 text-center space-y-6 glow-text max-w-md w-full">
-          <h1 className="text-4xl font-bold tracking-widest animate-pulse">SQUAMMY_SCRAMBLER</h1>
-          <p className="text-xl">VERSION 4.2.0_STEALTH</p>
-          <div className="space-y-2 opacity-60 text-sm">
-            <p>DETECTING HARDWARE...</p>
-            <p>ESTABLISHING SECURE TUNNEL...</p>
-            <p>LOADING ORGANIC_LIBRARIES...</p>
-          </div>
-          <button 
-            onClick={initializeSystem}
-            className="w-full py-4 text-2xl font-bold terminal-border hover:bg-[#33ff33] hover:text-black transition-all"
-          >
-            [ INITIALIZE_SYSTEM ]
-          </button>
-          <p className="text-xs opacity-40">SYSTEM WILL ENTER FULLSCREEN MODE UPON BOOT</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col max-w-6xl mx-auto space-y-4">
       {/* Terminal Header */}
@@ -119,12 +71,6 @@ const App: React.FC = () => {
         </div>
         <div className="text-right mt-2 md:mt-0 flex flex-col items-end">
           <div className="flex gap-4 mb-1">
-             <button 
-              onClick={toggleFullscreen}
-              className="text-xs border border-[#33ff33] px-2 py-0.5 hover:bg-[#33ff33] hover:text-black transition-colors"
-            >
-              [{isFullscreen ? 'EXIT_FS' : 'FULLSCREEN'}]
-            </button>
             <p>SYS_TIME: {new Date().toLocaleTimeString()}</p>
           </div>
           <p>AUTH_LEVEL: ROOT_ACCESS</p>
